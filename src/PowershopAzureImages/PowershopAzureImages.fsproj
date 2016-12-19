@@ -7,8 +7,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>8f061178-ee0a-4287-b593-2b7df78a47df</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>SuaveHost</RootNamespace>
-    <AssemblyName>SuaveHost</AssemblyName>
+    <RootNamespace>PowershopAzureImages</RootNamespace>
+    <AssemblyName>PowershopAzureImages</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.4.0.0</TargetFSharpCoreVersion>
