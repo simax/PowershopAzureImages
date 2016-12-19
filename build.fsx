@@ -19,24 +19,9 @@ Target "BuildSolution" (fun _ ->
                            "OutputPath", Kudu.deploymentTemp ] })
     |> ignore)
 
-//Target "StageWebsiteAssets" (fun _ ->
-//    let blacklist =
-//        [ "typings"
-//          ".fs"
-//          ".config"
-//          ".references"
-//          "tsconfig.json" ]
-//    let shouldInclude (file:string) =
-//        blacklist
-//        |> Seq.forall(not << file.Contains)
-//    Kudu.stageFolder (Path.GetFullPath @"src/webhost") shouldInclude)
-
-
 Target "Deploy" Kudu.kuduSync
 
-//"StageWebsiteAssets"
 "BuildSolution"
-//==> "StageWebJob"
 ==> "Deploy"
 
 
