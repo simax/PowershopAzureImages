@@ -7,7 +7,7 @@ open System
 open System.IO
 
 Environment.CurrentDirectory <- __SOURCE_DIRECTORY__
-let solutionFile = "Demonstrator.sln"
+let solutionFile = "PowershopAzureImages.sln"
 
 Target "BuildSolution" (fun _ ->
     solutionFile
