@@ -1,0 +1,1 @@
+# Powershop Azure Images
