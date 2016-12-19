@@ -33,3 +33,5 @@ output/
 paket-files/
 .fake/
 *.userprefs
+
+build/
