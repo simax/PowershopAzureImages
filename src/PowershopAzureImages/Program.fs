@@ -29,5 +29,11 @@ module PowershopAzureImages =
                     bindings = [ HttpBinding.mkSimple HTTP "127.0.0.1" port ] }
             | None -> config
 
-        startWebServer config (Successful.OK "Hello World!")
+        let routes = 
+            choose [
+                GET >=> path "/" >=> (Successful.OK "Welcome to Powershop AZURE Images API")
+                RequestErrors.NOT_FOUND "Found no handlers"
+        ]        
+
+        startWebServer config routes
         0
