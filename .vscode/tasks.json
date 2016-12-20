@@ -7,7 +7,7 @@
 // ${cwd}: the current working directory of the spawned process
 
 {
-	"version": "0.1.0",
+	"version": "1.0.0",
 
 	// The command is tsc. Assumes that tsc has been installed using npm install -g typescript
 	"command": "./build.sh",

@@ -8,4 +8,6 @@ nuget FAKE
 nuget Suave
 nuget Newtonsoft.Json
 
-
+// Swagger
+nuget Suave.Swagger
+nuget Swagger
