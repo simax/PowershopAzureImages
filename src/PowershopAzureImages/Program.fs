@@ -48,7 +48,7 @@ module PowershopAzureImages =
 
     let uploadImage =
         let rootPath =
-            match Environment.GetEnvironmentVariable("WEROOT_PATH") with
+            match Environment.GetEnvironmentVariable("WEBROOT_PATH") with
             | null -> "/users/simonlomax/temp/images"
             | value -> value
 
