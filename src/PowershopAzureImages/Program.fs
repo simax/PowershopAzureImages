@@ -57,7 +57,7 @@ module PowershopAzureImages =
             let moveFiles2Root srcFile destFile =
                 let destination = Path.Combine(rootPath, destFile)
                 if File.Exists(destination) then File.Delete(destination)
-                //System.IO.File.Move(srcFile, destination)    
+                System.IO.File.Move(srcFile, destination)    
                 destination
                 
             match r.files with
