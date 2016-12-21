@@ -52,7 +52,7 @@ module PowershopAzureImages =
                 
             match r.files with
             | [] -> "No filename supplied !!!!!!!" |> BAD_REQUEST 
-            | x::xs -> x.fileName |> OK 
+            | x::_ -> sprintf "%s %s %s" x.fieldName x.fileName x.tempFilePath  |> OK 
         request upload 
 
 
@@ -88,5 +88,5 @@ module PowershopAzureImages =
                 RequestErrors.NOT_FOUND "Found no handlers"
         ]        
 
-        startWebServer config imageApi.App
+        startWebServer config routes
         0
