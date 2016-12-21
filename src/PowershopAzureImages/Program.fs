@@ -57,7 +57,8 @@ module PowershopAzureImages =
                 let destination = Path.Combine(rootPath, destFile)
                 if File.Exists(destination) then File.Delete(destination)
                 //System.IO.File.Move(srcFile, destination)    
-                destination
+                //destination
+                sprintf "WEB_ROOT_PATH: %s" <| Environment.GetEnvironmentVariable("WEBROOT_PATH")
 
             match r.files with
             | [] -> "No filename supplied !!!!!!!" |> BAD_REQUEST 
