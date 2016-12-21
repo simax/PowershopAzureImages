@@ -47,19 +47,19 @@ module PowershopAzureImages =
           Name:string }
 
     let uploadImage =
+        let localRoot = "/users/simonlomax/temp/images"
         let rootPath =
-            match Environment.GetEnvironmentVariable("WEBROOT_PATH") with
-            | null -> "/users/simonlomax/temp/images"
-            | value -> value
+            match Environment.GetEnvironmentVariable("APP_POOL_ID") with
+            | null -> localRoot
+            | value -> if value = "PowershopAzureImages" then "d:/home/site/wwwroot" else localRoot
 
         let upload r = 
             let moveFiles2Root srcFile destFile =
                 let destination = Path.Combine(rootPath, destFile)
                 if File.Exists(destination) then File.Delete(destination)
                 //System.IO.File.Move(srcFile, destination)    
-                //destination
-                sprintf "WEB_ROOT_PATH: %s" <| Environment.GetEnvironmentVariable("WEBROOT_PATH")
-
+                destination
+                
             match r.files with
             | [] -> "No filename supplied !!!!!!!" |> BAD_REQUEST 
             | x::_ -> moveFiles2Root x.tempFilePath x.fileName 
