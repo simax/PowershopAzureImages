@@ -11,6 +11,7 @@
             | false, _ -> None
 
 
+
 module PowershopAzureImages =
 
     open Suave
@@ -20,6 +21,7 @@ module PowershopAzureImages =
     open Suave.Operators
     open System.Net
     open System
+    open System.IO
 
     open Suave.Swagger
     open Rest
@@ -45,16 +47,25 @@ module PowershopAzureImages =
           Name:string }
 
     let uploadImage =
+        let rootPath =
+            match Environment.GetEnvironmentVariable("WEROOT_PATH") with
+            | null -> "/users/simonlomax/temp/images"
+            | value -> value
+
         let upload r = 
-            //let s = match r[0] with 
-            //          | (s, None) -> None
-            //          | (_ ,Some x) -> x
-                
+            let moveFiles2Root srcFile destFile =
+                let destination = Path.Combine(rootPath, destFile)
+                if File.Exists(destination) then File.Delete(destination)
+                System.IO.File.Move(srcFile, destination)    
+                destination
+
             match r.files with
             | [] -> "No filename supplied !!!!!!!" |> BAD_REQUEST 
-            | x::_ -> sprintf "%s %s %s" x.fieldName x.fileName x.tempFilePath  |> OK 
-        request upload 
+            | x::_ -> moveFiles2Root x.tempFilePath x.fileName 
+                      |> sprintf "Moved: %s to %s " x.tempFilePath 
+                      |> OK 
 
+        request upload 
 
     let imageApi = 
         swagger {
@@ -62,10 +73,15 @@ module PowershopAzureImages =
             for route in getting (simpleUrl "/time" |> thenReturns now) do
                 yield description Of route is "What time is it ?"
 
-            for route in posting <| simpleUrl "/pictures" |> thenReturns uploadImage do
+            for route in getOf (path "/time2" >=> now) do
+                yield urlTemplate Of route is "/time2"
+                yield description Of route is "What time is it 2 ?"
+
+            for route in postOf (path "/pictures" >=> uploadImage) do
+                yield urlTemplate Of route is "/pictures"
                 yield description Of route is "Post an image"
                 yield route |> addResponse 200 "Returns the URL of the created image" None
-                yield parameter "File to upload" postOf route (fun p -> { p with Name = "Files"; Type = (Some typeof<System.IO.File>); In=FormData })
+                yield parameter "File to upload" postOf route (fun p -> { p with Name = "uploadedImage"; Type = (Some typeof<System.IO.File>); In=FormData })
         }
 
     [<EntryPoint>]
@@ -88,5 +104,5 @@ module PowershopAzureImages =
                 RequestErrors.NOT_FOUND "Found no handlers"
         ]        
 
-        startWebServer config routes
+        startWebServer config imageApi.App
         0
