@@ -3,6 +3,7 @@ redirects on
 framework net452
 
 nuget FAKE
+nuget FSharp.Azure.StorageTypeProvider
 
 // Suave
 nuget Suave
