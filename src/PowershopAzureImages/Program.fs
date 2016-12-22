@@ -47,11 +47,13 @@ module PowershopAzureImages =
           Name:string }
 
     let uploadImage =
-        let localRoot = "/users/simonlomax/temp/images"
         let rootPath =
+            let localRoot = "/users/simonlomax/temp/images"
+            let azureRoot = "d:/home/site/wwwroot"
+            // Asuming APP_POOL_ID only exists on Azure.    
             match Environment.GetEnvironmentVariable("APP_POOL_ID") with
             | null -> localRoot
-            | value -> if value = "PowershopAzureImages" then "d:/home/site/wwwroot" else localRoot
+            | value -> if value = "PowershopAzureImages" then azureRoot else localRoot
 
         let upload r = 
             let moveFiles2Root srcFile destFile =
@@ -59,24 +61,23 @@ module PowershopAzureImages =
                 if File.Exists(destination) then File.Delete(destination)
                 System.IO.File.Move(srcFile, destination)    
                 destination
-                
+            
             match r.files with
-            | [] -> "No filename supplied !!!!!!!" |> BAD_REQUEST 
-            | x::_ -> moveFiles2Root x.tempFilePath x.fileName 
-                      |> sprintf "Moved: %s to %s " x.tempFilePath 
-                      |> OK 
+            | [] -> "No file(s) were supplied" |> BAD_REQUEST 
+            | h :: _ -> moveFiles2Root h.tempFilePath h.fileName 
+                        |> sprintf "Moved: %s to %s " h.tempFilePath 
+                        |> OK 
 
         request upload 
 
     let imageApi = 
         swagger {
-            // syntax 1
-            for route in getting (simpleUrl "/time" |> thenReturns now) do
-                yield description Of route is "What time is it ?"
+            // for route in getting (simpleUrl "/time" |> thenReturns now) do
+            //     yield description Of route is "What time is it ?"
 
-            for route in getOf (path "/time2" >=> now) do
-                yield urlTemplate Of route is "/time2"
-                yield description Of route is "What time is it 2 ?"
+            // for route in getOf (path "/time2" >=> now) do
+            //     yield urlTemplate Of route is "/time2"
+            //     yield description Of route is "What time is it 2 ?"
 
             for route in postOf (path "/pictures" >=> uploadImage) do
                 yield urlTemplate Of route is "/pictures"
