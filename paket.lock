@@ -112,6 +112,7 @@ NUGET
       NETStandard.Library (>= 1.6.1)
       System.Buffers (>= 4.3)
       System.Diagnostics.Contracts (>= 4.3)
+    Microsoft.WindowsAzure.ConfigurationManager (3.2.3)
     NETStandard.Library (1.6.1)
       System.Collections.Concurrent (>= 4.3)
       System.Diagnostics.Tracing (>= 4.3)
