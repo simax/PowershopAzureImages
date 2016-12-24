@@ -1,6 +1,5 @@
-
 #r "../../packages/WindowsAzure.Storage/lib/net45/Microsoft.WindowsAzure.Storage.dll"
-//#r "../../packages/Microsoft.WindowsAzure.ConfigurationManager/lib/net40/Microsoft.WindowsAzure.Configuration.dll"
+#r "../../packages/Microsoft.Azure.KeyVault.Core/lib/net45/Microsoft.Azure.KeyVault.Core.dll"
 
 //#r "packages/WindowsAzure.Storage.8.0.0/lib/net45/Microsoft.WindowsAzure.Storage.dll"
 //#r "packages/Microsoft.WindowsAzure.ConfigurationManager.3.2.3/lib/net40/Microsoft.WindowsAzure.Configuration.dll"
@@ -8,17 +7,16 @@
 open System
 open System.IO
 //open Microsoft.Azure
-open Microsoft.WindowsAzure // Namespace for CloudConfigurationManager
+//open Microsoft.WindowsAzure // Namespace for CloudConfigurationManager
 open Microsoft.WindowsAzure.Storage // Namespace for CloudStorageAccount
 open Microsoft.WindowsAzure.Storage.Blob // Namespace for Blob storage types
 
-
 // Parse the connection string and return a reference to the storage account.
-let storageConnString = "DefaultEndpointsProtocol=https;AccountName=powershop;AccountKey=3yOHdp1t0dGNi91+YAsIYd3Q6D9ZGQCd/xqpq0SJ4TJLSS2TnnPaFMBYgMr/KKmLwm5kE9rLVnA8H/jrVxf9Fg==";
+//let storageConnString = "DefaultEndpointsProtocol=https;AccountName=powershop;AccountKey=3yOHdp1t0dGNi91+YAsIYd3Q6D9ZGQCd/xqpq0SJ4TJLSS2TnnPaFMBYgMr/KKmLwm5kE9rLVnA8H/jrVxf9Fg==";
 
-//CloudConfigurationManager.GetSetting("StorageConnectionString")
+//let storageConnString = CloudConfigurationManager.GetSetting("StorageConnectionString")
 
-//let storageConnString = @"DefaultEndpointsProtocol=https;AccountName=powershop;AccountKey=3yOHdp1t0dGNi91+YAsIYd3Q6D9ZGQCd/xqpq0SJ4TJLSS2TnnPaFMBYgMr/KKmLwm5kE9rLVnA8H/jrVxf9Fg==" 
+let storageConnString = @"DefaultEndpointsProtocol=https;AccountName=powershop;AccountKey=3yOHdp1t0dGNi91+YAsIYd3Q6D9ZGQCd/xqpq0SJ4TJLSS2TnnPaFMBYgMr/KKmLwm5kE9rLVnA8H/jrVxf9Fg==" 
 
 // Parse the connection string and return a reference to the storage account.
 let storageAccount = CloudStorageAccount.Parse(storageConnString)
@@ -35,15 +33,16 @@ container.CreateIfNotExists()
 let permissions = BlobContainerPermissions(PublicAccess=BlobContainerPublicAccessType.Blob)
 container.SetPermissions(permissions)
 
-
 // Retrieve reference to a blob named "myblob.txt".
-let blockBlob = container.GetBlockBlobReference("myblob.txt")
+let blockBlob = container.GetBlockBlobReference("products/images/uploaded-file.txt")
 
 // Create or overwrite the "myblob.txt" blob with contents from the local file.
 // Create a dummy file to upload
-//let localFile = __SOURCE_DIRECTORY__ + "/myfile.txt"
-//File.WriteAllText(localFile, "some data")
-//blockBlob.UploadFromFile(localFile) 
+let currDir = "/Users/simonlomax/Documents/Development/fsharp-projects/PowershopAzureImages/src/"
+let localFile = currDir + "myfile.txt"
+File.WriteAllText(localFile, "some data")
+blockBlob.UploadFromFile(localFile) 
+
 
 // Loop over items within the container and output the length and URI.
 for item in container.ListBlobs(null, false) do

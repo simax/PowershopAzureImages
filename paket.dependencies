@@ -3,7 +3,7 @@ redirects on
 framework net452
 
 nuget FAKE
-nuget Microsoft.WindowsAzure.ConfigurationManager
+//nuget Microsoft.WindowsAzure.ConfigurationManager
 // nuget FSharp.Azure.StorageTypeProvider
 
 // Suave
