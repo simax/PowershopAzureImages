@@ -12,15 +12,17 @@ let rules : Rule list =
                  |> Array.filter Char.IsLetter
                  |> Array.forall Char.IsUpper, "Must all be caps" ]
 
-let buildValidator (rules : Rule list) =
-    rules
-    |> List.reduce (fun firstRule secondRule word ->
-                    printfn "word: %s" word    
+let reducer = fun firstRule secondRule word ->
+                    //printfn "word: %s" word    
                     let passed, error = firstRule word
                     if passed then
                         let passed, error = secondRule word
                         if passed then true, "" else false, error 
-                    else false, error)    
+                    else false, error
+
+let buildValidator (rules : Rule list) =
+    rules
+    |> List.reduce reducer    
 
 let validate = buildValidator rules                    
 let phrase = "HELLO FrOM F#"
