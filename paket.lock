@@ -3,8 +3,6 @@ FRAMEWORK: NET452
 NUGET
   remote: https://www.nuget.org/api/v2
     FAKE (4.47.1)
-    FSharp.Azure.StorageTypeProvider (1.7)
-      WindowsAzure.Storage (>= 6.0)
     FSharp.Core (4.0.0.1)
     Microsoft.AspNetCore.Authorization (1.1)
       Microsoft.Extensions.Logging.Abstractions (>= 1.1)

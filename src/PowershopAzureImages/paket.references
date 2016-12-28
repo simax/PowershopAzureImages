@@ -2,5 +2,5 @@ Suave
 Newtonsoft.Json
 Swagger
 Suave.Swagger
-FSharp.Azure.StorageTypeProvider
+WindowsAzure.Storage
 Microsoft.WindowsAzure.ConfigurationManager

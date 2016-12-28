@@ -1,4 +1,6 @@
-﻿module IISHelpers =
+﻿namespace PowershopAzureImages
+
+module IISHelpers =
     open System
 
     /// Port specified by IIS HttpPlatformHandler
@@ -12,7 +14,7 @@
 
 
 
-module PowershopAzureImages =
+module Api =
 
     open Suave
     open Suave.Successful
@@ -28,6 +30,8 @@ module PowershopAzureImages =
     open FunnyDsl
     open Swagger
 
+    open AzureStorageHelpers
+
     let now : WebPart =
         fun (x : HttpContext) ->
             async {
@@ -36,35 +40,30 @@ module PowershopAzureImages =
             return! MODEL DateTime.Now x
             }
 
-    [<CLIMutable>] 
-    type Pet =
-        { 
-          Id:int
-          Name:string
-          Category:PetCategory }
-    and [<CLIMutable>] PetCategory = 
-        { Id:int
-          Name:string }
 
     let uploadImage =
-        let rootPath =
-            let localRoot = "/users/simonlomax/temp/images"
-            let azureRoot = "d:/home/site/wwwroot"
-            // Asuming APP_POOL_ID only exists on Azure.    
-            match Environment.GetEnvironmentVariable("APP_POOL_ID") with
-            | null -> localRoot
-            | value -> if value = "PowershopAzureImages" then azureRoot else localRoot
+        // let rootPath =
+        //     let localRoot = "/users/simonlomax/temp/images"
+        //     let azureRoot = "d:/home/site/wwwroot"
+        //     // Asuming APP_POOL_ID only exists on Azure.    
+        //     match Environment.GetEnvironmentVariable("APP_POOL_ID") with
+        //     | null -> localRoot
+        //     | value -> if value = "PowershopAzureImages" then azureRoot else localRoot
 
         let upload r = 
-            let moveFiles2Root srcFile destFile =
-                let destination = Path.Combine(rootPath, destFile)
-                if File.Exists(destination) then File.Delete(destination)
-                System.IO.File.Move(srcFile, destination)    
-                destination
-            
+            // let moveFiles2Root srcFile destFile =
+            //     let destination = Path.Combine(rootPath, destFile)
+            //     if File.Exists(destination) then File.Delete(destination)
+            //     System.IO.File.Move(srcFile, destination)    
+            //     destination
+
+            let uploadToAzurecontainer sourcePath destinationPath =    
+                let container = GetShopContainer "shop001"
+                AzureStorageHelpers.uploadFile container sourcePath destinationPath
+
             match r.files with
             | [] -> "No file(s) were supplied" |> BAD_REQUEST 
-            | h :: _ -> moveFiles2Root h.tempFilePath h.fileName 
+            | h :: _ -> uploadToAzurecontainer h.tempFilePath (Path.Combine("products/images/", h.fileName))
                         |> sprintf "Moved: %s to %s " h.tempFilePath 
                         |> OK 
 
@@ -106,5 +105,5 @@ module PowershopAzureImages =
                 RequestErrors.NOT_FOUND "Found no handlers"
         ]        
 
-        startWebServer config imageApi.App
+        startWebServer config routes
         0

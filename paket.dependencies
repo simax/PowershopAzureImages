@@ -15,4 +15,3 @@ nuget Swagger
 // Windows Azure Storage
 nuget WindowsAzure.Storage 
 nuget Microsoft.WindowsAzure.ConfigurationManager
-nuget FSharp.Azure.StorageTypeProvider
