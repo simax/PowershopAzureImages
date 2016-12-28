@@ -1,6 +1,6 @@
 open System
-type Rule = string -> bool * string
 
+type Rule = string -> bool * string
 
 let rules : Rule list = 
     [fun text -> printfn "Rule 1 " 
@@ -11,6 +11,7 @@ let rules : Rule list =
                  text.ToCharArray()
                  |> Array.filter Char.IsLetter
                  |> Array.forall Char.IsUpper, "Must all be caps" ]
+                 
 
 let reducer = fun firstRule secondRule word ->
                     //printfn "word: %s" word    
@@ -29,3 +30,10 @@ let phrase = "HELLO FrOM F#"
 
 validate phrase
                       
+let tryLoadCustomer id = 
+    if id >= 2 && id <= 7 then Some <| sprintf "Customer %d" id else None  
+
+let ids = 
+    [1; 2; 3; 4; 5; 6; 7; 8; 9; 10]
+    |> List.choose tryLoadCustomer 
+    

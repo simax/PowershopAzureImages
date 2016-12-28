@@ -3,8 +3,6 @@ redirects on
 framework net452
 
 nuget FAKE
-//nuget Microsoft.WindowsAzure.ConfigurationManager
-// nuget FSharp.Azure.StorageTypeProvider
 
 // Suave
 nuget Suave
@@ -16,3 +14,5 @@ nuget Swagger
 
 // Windows Azure Storage
 nuget WindowsAzure.Storage 
+nuget Microsoft.WindowsAzure.ConfigurationManager
+nuget FSharp.Azure.StorageTypeProvider
