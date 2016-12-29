@@ -5,7 +5,7 @@ framework net452
 nuget FAKE
 
 // Suave
-nuget Suave
+nuget Suave rc 2.0.0-rc8
 nuget Newtonsoft.Json
 
 // Swagger

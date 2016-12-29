@@ -40,32 +40,81 @@ module Api =
             return! MODEL DateTime.Now x
             }
 
+    type ImageInfo = {
+        sourceFile : string
+        shopId: string
+        product: string
+        imageSize: string
+    }        
+
+    type Result<'TSuccess,'TFailure> = 
+        | Success of 'TSuccess
+        | Failure of 'TFailure
 
     let uploadImage =
-        // let rootPath =
-        //     let localRoot = "/users/simonlomax/temp/images"
-        //     let azureRoot = "d:/home/site/wwwroot"
-        //     // Asuming APP_POOL_ID only exists on Azure.    
-        //     match Environment.GetEnvironmentVariable("APP_POOL_ID") with
-        //     | null -> localRoot
-        //     | value -> if value = "PowershopAzureImages" then azureRoot else localRoot
+        // Url: /images?shopid=shop001&product=ballon&imageSize=78x78
+
+        let imageInfo = { sourceFile = ""; shopId = ""; product = ""; imageSize = ""}
+    
+        let validateSourceFileExists (req:HttpRequest) = 
+            match req.files with
+            | [] -> Failure "No file(s) were supplied" 
+            | h :: _ -> Success (req, { imageInfo with sourceFile = h.tempFilePath })
+
+        let validateShopIdExists (req:HttpRequest, imageInfo) =    
+            match req.queryParam "shopid" with
+            | Choice1Of2 shopId -> Success (req, { imageInfo with shopId = shopId})
+            | Choice2Of2 _ -> Failure "ShopId not supplied" 
+            
+        let validateProductExists (req:HttpRequest, imageInfo) =    
+            match req.queryParam "product" with
+            | Choice1Of2 product -> Success (req, { imageInfo with product = product })
+            | Choice2Of2 _ -> Failure "Product not supplied" 
+
+        let validateImageSizeExists (req:HttpRequest, imageInfo) =    
+            match req.queryParam "imageSize" with
+            | Choice1Of2 imageSize -> Success (req, { imageInfo with imageSize = imageSize })
+            | Choice2Of2 _ -> Failure "ImageSize not supplied" 
+
+        let bind switchFunction twoTrackInput = 
+            match twoTrackInput with
+            | Success s -> switchFunction s
+            | Failure f -> Failure f
+
+        let (>>=) twoTrackInput switchFunction = 
+            bind switchFunction twoTrackInput 
+
+        let combinedValidation x = 
+            x 
+            |> validateSourceFileExists
+            >>= validateShopIdExists  // ... so use "bind pipe". Again the result is a two track output
+            >>= validateProductExists
+            >>= validateImageSizeExists
+
+
+            // uploadToAzurecontainer h.tempFilePath (Path.Combine("products/images/", h.fileName))
+            //             |> sprintf "Moved: %s to %s " h.tempFilePath 
+            //             |> OK 
+            
 
         let upload r = 
-            // let moveFiles2Root srcFile destFile =
-            //     let destination = Path.Combine(rootPath, destFile)
-            //     if File.Exists(destination) then File.Delete(destination)
-            //     System.IO.File.Move(srcFile, destination)    
-            //     destination
 
-            let uploadToAzurecontainer sourcePath destinationPath =    
-                let container = GetShopContainer "shop001"
-                AzureStorageHelpers.uploadFile container sourcePath destinationPath
+            // let uploadToAzurecontainer sourcePath destinationPath =    
+            //     let container = GetShopContainer "shop001"
+            //     AzureStorageHelpers.uploadFile container sourcePath destinationPath
+    
+            // match r.files with
+            // | [] -> "No file(s) were supplied" |> BAD_REQUEST 
+            // | h :: _ -> uploadToAzurecontainer h.tempFilePath (Path.Combine("products/images/", h.fileName))
+            //             |> sprintf "Moved: %s to %s " h.tempFilePath 
+            //             |> OK 
 
-            match r.files with
-            | [] -> "No file(s) were supplied" |> BAD_REQUEST 
-            | h :: _ -> uploadToAzurecontainer h.tempFilePath (Path.Combine("products/images/", h.fileName))
-                        |> sprintf "Moved: %s to %s " h.tempFilePath 
-                        |> OK 
+            let convertToString x = 
+                match x with 
+                | Success (r, imageInfo) -> sprintf "%A" imageInfo
+                | Failure f -> f
+
+            combinedValidation r |> convertToString |> OK
 
         request upload 
 
@@ -87,20 +136,22 @@ module Api =
 
     [<EntryPoint>]
     let main argv =
-        let config = defaultConfig
+
+        let config = { defaultConfig with maxContentLength = 5000000 } // 5 MB
         let config =
             match IISHelpers.httpPlatformPort with
             | Some port ->
                 { config with
-                    bindings = [ HttpBinding.mkSimple HTTP "127.0.0.1" port ] }
-            | None -> config
+                    bindings = [ HttpBinding.createSimple HTTP "127.0.0.1" port ]
+                }
+            | None -> config 
 
         
 
         let routes = 
             choose [
                 GET >=> path "/" >=> (Successful.OK "Welcome to Powershop AZURE Images API")
-                POST >=> path "/pictures" >=> uploadImage
+                POST >=> path "/images" >=> uploadImage
                 
                 RequestErrors.NOT_FOUND "Found no handlers"
         ]        
