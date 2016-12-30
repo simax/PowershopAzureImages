@@ -1,6 +1,6 @@
 source https://www.nuget.org/api/v2/
 redirects on
-framework net452
+framework auto-detect
 
 nuget FAKE
 
