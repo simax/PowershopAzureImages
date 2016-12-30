@@ -22,58 +22,13 @@ module Api =
     open System.Net
     open System
     open System.IO
+    open Common
+    open Images
 
     open AzureStorageHelpers
 
-    type ImageInfo = {
-        sourceFile : string
-        shopId: string
-        product: string
-        imageSize: string
-    }        
-
-    type Result<'TSuccess> = 
-        | Success of 'TSuccess
-        | Failure of string
-
     let uploadImage =
         // Url: /images?shopid=shop001&product=balloon&imageSize=78x78
-
-        let imageInfo = { sourceFile = ""; shopId = ""; product = ""; imageSize = ""}
-    
-        let validateSourceFileExists (req:HttpRequest) = 
-            match req.files with
-            | [] -> Failure "No file(s) were supplied" 
-            | h :: _ -> Success (req, { imageInfo with sourceFile = h.tempFilePath })
-
-        let validateShopIdExists (req:HttpRequest, imageInfo) =    
-            match req.queryParam "shopid" with
-            | Choice1Of2 shopId -> Success (req, { imageInfo with shopId = shopId})
-            | Choice2Of2 _ -> Failure "ShopId not supplied" 
-            
-        let validateProductExists (req:HttpRequest, imageInfo) =    
-            match req.queryParam "product" with
-            | Choice1Of2 product -> Success (req, { imageInfo with product = product })
-            | Choice2Of2 _ -> Failure "Product not supplied" 
-
-        let validateImageSizeExists (req:HttpRequest, imageInfo) =    
-            match req.queryParam "imageSize" with
-            | Choice1Of2 imageSize -> Success (req, { imageInfo with imageSize = imageSize })
-            | Choice2Of2 _ -> Failure "ImageSize not supplied" 
-
-        let bind switchFn input = 
-            match input with
-            | Success s -> switchFn s
-            | Failure f -> Failure f
-
-        let (>>=) input switchFn = bind switchFn input 
-
-        let validateImageInfo imageInfo = 
-            imageInfo 
-            |> validateSourceFileExists
-            >>= validateShopIdExists  // ... so use "bind pipe". Again the result is a two track output
-            >>= validateProductExists
-            >>= validateImageSizeExists
 
         let upload req = 
 
@@ -85,8 +40,8 @@ module Api =
 
             let uploadIfValid data =    
                 match data with
-                | Success (r, imageInfo) -> uploadToAzure imageInfo
-                | Failure error -> error 
+                | Success (r, imageInfo) -> uploadToAzure imageInfo |> CREATED
+                | Failure error -> error |> BAD_REQUEST 
     
             // let convertToString x = 
             //     match x with 
@@ -96,9 +51,7 @@ module Api =
             validateImageInfo req 
             // |> convertToString |> OK
             |> uploadIfValid 
-            |> CREATED
-
-
+            
         request upload 
 
     [<EntryPoint>]

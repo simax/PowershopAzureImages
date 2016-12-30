@@ -43,6 +43,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Common.fs" />
+    <Compile Include="Images.fs" />
     <Compile Include="AzureStorageHelpers.fs" />
     <Compile Include="App.fs" />
     <None Include="App.config" />
