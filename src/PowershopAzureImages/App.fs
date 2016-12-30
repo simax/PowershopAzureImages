@@ -47,9 +47,9 @@ module Api =
         imageSize: string
     }        
 
-    type Result<'TSuccess,'TFailure> = 
+    type Result<'TSuccess> = 
         | Success of 'TSuccess
-        | Failure of 'TFailure
+        | Failure of string
 
     let uploadImage =
         // Url: /images?shopid=shop001&product=balloon&imageSize=78x78
@@ -117,7 +117,7 @@ module Api =
             validateImageInfo req 
             // |> convertToString |> OK
             |> uploadIfValid 
-            |> OK
+            |> CREATED
 
 
         request upload 
