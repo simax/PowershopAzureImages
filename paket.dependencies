@@ -6,7 +6,7 @@ nuget FAKE
 
 // Suave
 nuget Suave >= 2 prerelease
-nuget Newtonsoft.Json
+nuget Newtonsoft.Json  
 
 // Swagger
 nuget Suave.Swagger
