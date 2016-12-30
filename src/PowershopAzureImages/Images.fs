@@ -12,13 +12,9 @@ module Images =
         imageSize: string
     }    
 
-    // let (|IgnoreCase|_|) (str:string) arg = 
-    //     if String.Compare(str, arg, StringComparison.OrdinalIgnoreCase) = 0
-    //         then Some() else None
+    // Validation 
 
-    let imageInfo = { sourceFile = ""; shopId = ""; product = ""; imageSize = ""}
-
-    let validateSourceFileExists (req:HttpRequest) = 
+    let validateSourceFileExists (req:HttpRequest, imageInfo) = 
         match req.files with
         | [] -> Failure "No file(s) were supplied" 
         | h :: _ -> Success (req, { imageInfo with sourceFile = h.tempFilePath })
@@ -45,9 +41,17 @@ module Images =
 
     let (>>=) input switchFn = bind switchFn input 
 
-    let validateImageInfo imageInfo = 
-        imageInfo 
+    let validateImageCreationInfo req imageInfo = 
+        (req, imageInfo)
         |> validateSourceFileExists
         >>= validateShopIdExists  
         >>= validateProductExists
         >>= validateImageSizeExists
+
+    let validateImageDeletionInfo req imageInfo = 
+        (req, imageInfo)  
+        |> validateShopIdExists  
+        >>= validateProductExists
+        >>= validateImageSizeExists
+
+ 

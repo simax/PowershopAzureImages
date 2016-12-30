@@ -27,37 +27,50 @@ module Api =
 
     open AzureStorageHelpers
 
+
+    let proceedIfValid req imageInfo validator proceed =
+        match validator req imageInfo with 
+        | Success (_, imageInfo) -> proceed imageInfo
+        | Failure error -> error |> BAD_REQUEST 
+
+    let deleteImage =
+
+        let delete req = 
+            let deleteFromAzure (imageInfo:ImageInfo) =
+                let container = GetShopContainer imageInfo.shopId
+                let imagePath = sprintf "images/%s-[%s].jpg" imageInfo.product imageInfo.imageSize
+
+                let isDeleted = AzureStorageHelpers.deleteFile container imagePath
+                if isDeleted then GONE "Image removed" else BAD_REQUEST "Unable to delete image"
+
+            let imageInfo = { sourceFile = ""; shopId = ""; product = ""; imageSize = ""}        
+            proceedIfValid req imageInfo validateImageDeletionInfo deleteFromAzure        
+           
+        request delete
+
+
     let uploadImage =
         // Url: /images?shopid=shop001&product=balloon&imageSize=78x78
 
         let upload req = 
-
             let uploadToAzure (imageInfo:ImageInfo) =
                 let container = GetShopContainer imageInfo.shopId
                 let sourcePath = imageInfo.sourceFile
                 let destinationPath = sprintf "images/%s-[%s].jpg" imageInfo.product imageInfo.imageSize
                 AzureStorageHelpers.uploadFile container sourcePath destinationPath 
+                |> CREATED
 
-            let uploadIfValid data =    
-                match data with
-                | Success (r, imageInfo) -> uploadToAzure imageInfo |> CREATED
-                | Failure error -> error |> BAD_REQUEST 
-    
-            // let convertToString x = 
-            //     match x with 
-            //     | Success (r, imageInfo) -> sprintf "%A" imageInfo
-            //     | Failure f -> f
-
-            validateImageInfo req 
-            // |> convertToString |> OK
-            |> uploadIfValid 
-            
+            let imageInfo = { sourceFile = ""; shopId = ""; product = ""; imageSize = ""}        
+            proceedIfValid req imageInfo validateImageCreationInfo uploadToAzure        
+           
         request upload 
 
     [<EntryPoint>]
+
     let main argv =
 
-        let config = { defaultConfig with maxContentLength = 5000000 } // 5 MB
+        // Maximum image size is 5 MB becuase maxContentLength od Post data is 5MB   
+        let config = { defaultConfig with maxContentLength = 5000000 } 
         let config =
             match IISHelpers.httpPlatformPort with
             | Some port ->
@@ -66,13 +79,14 @@ module Api =
                 }
             | None -> config 
 
-        
 
         let routes = 
             choose [
                 GET >=> path "/" >=> (Successful.OK "Welcome to Powershop AZURE Images API")
                 POST >=> path "/images" >=> uploadImage
-                
+                DELETE >=> path "/images" >=> deleteImage
+
+
                 RequestErrors.NOT_FOUND "Found no handlers"
         ]        
 
