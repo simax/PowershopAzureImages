@@ -52,7 +52,7 @@ module Api =
         | Failure of 'TFailure
 
     let uploadImage =
-        // Url: /images?shopid=shop001&product=ballon&imageSize=78x78
+        // Url: /images?shopid=shop001&product=balloon&imageSize=78x78
 
         let imageInfo = { sourceFile = ""; shopId = ""; product = ""; imageSize = ""}
     
@@ -76,16 +76,15 @@ module Api =
             | Choice1Of2 imageSize -> Success (req, { imageInfo with imageSize = imageSize })
             | Choice2Of2 _ -> Failure "ImageSize not supplied" 
 
-        let bind switchFunction twoTrackInput = 
-            match twoTrackInput with
-            | Success s -> switchFunction s
+        let bind switchFn input = 
+            match input with
+            | Success s -> switchFn s
             | Failure f -> Failure f
 
-        let (>>=) twoTrackInput switchFunction = 
-            bind switchFunction twoTrackInput 
+        let (>>=) input switchFn = bind switchFn input 
 
-        let combinedValidation x = 
-            x 
+        let validateImageInfo imageInfo = 
+            imageInfo 
             |> validateSourceFileExists
             >>= validateShopIdExists  // ... so use "bind pipe". Again the result is a two track output
             >>= validateProductExists
@@ -97,24 +96,29 @@ module Api =
             //             |> OK 
             
 
-        let upload r = 
+        let upload req = 
 
-            // let uploadToAzurecontainer sourcePath destinationPath =    
-            //     let container = GetShopContainer "shop001"
-            //     AzureStorageHelpers.uploadFile container sourcePath destinationPath
+            let uploadToAzure (imageInfo:ImageInfo) =
+                let container = GetShopContainer imageInfo.shopId
+                let sourcePath = imageInfo.sourceFile
+                let destinationPath = sprintf "images/%s-[%s].jpg" imageInfo.product imageInfo.imageSize
+                AzureStorageHelpers.uploadFile container sourcePath destinationPath 
+
+            let uploadIfValid data =    
+                match data with
+                | Success (r, imageInfo) -> uploadToAzure imageInfo
+                | Failure error -> error 
     
-            // match r.files with
-            // | [] -> "No file(s) were supplied" |> BAD_REQUEST 
-            // | h :: _ -> uploadToAzurecontainer h.tempFilePath (Path.Combine("products/images/", h.fileName))
-            //             |> sprintf "Moved: %s to %s " h.tempFilePath 
-            //             |> OK 
+            // let convertToString x = 
+            //     match x with 
+            //     | Success (r, imageInfo) -> sprintf "%A" imageInfo
+            //     | Failure f -> f
 
-            let convertToString x = 
-                match x with 
-                | Success (r, imageInfo) -> sprintf "%A" imageInfo
-                | Failure f -> f
+            validateImageInfo req 
+            // |> convertToString |> OK
+            |> uploadIfValid 
+            |> OK
 
-            combinedValidation r |> convertToString |> OK
 
         request upload 
 
