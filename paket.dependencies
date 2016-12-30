@@ -6,12 +6,10 @@ nuget FAKE
 
 // Suave
 nuget Suave >= 2 prerelease
-nuget Newtonsoft.Json  
-
-// Swagger
-nuget Suave.Swagger
-nuget Swagger
 
 // Windows Azure Storage
 nuget WindowsAzure.Storage 
 nuget Microsoft.WindowsAzure.ConfigurationManager
+
+// Other
+nuget Newtonsoft.Json  

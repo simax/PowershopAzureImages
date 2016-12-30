@@ -12,8 +12,6 @@ module IISHelpers =
             | true, value -> Some value
             | false, _ -> None
 
-
-
 module Api =
 
     open Suave
@@ -25,20 +23,7 @@ module Api =
     open System
     open System.IO
 
-    open Suave.Swagger
-    open Rest
-    open FunnyDsl
-    open Swagger
-
     open AzureStorageHelpers
-
-    let now : WebPart =
-        fun (x : HttpContext) ->
-            async {
-            // The MODEL helper checks the "Accept" header 
-            // and switches between XML and JSON format
-            return! MODEL DateTime.Now x
-            }
 
     type ImageInfo = {
         sourceFile : string
@@ -90,12 +75,6 @@ module Api =
             >>= validateProductExists
             >>= validateImageSizeExists
 
-
-            // uploadToAzurecontainer h.tempFilePath (Path.Combine("products/images/", h.fileName))
-            //             |> sprintf "Moved: %s to %s " h.tempFilePath 
-            //             |> OK 
-            
-
         let upload req = 
 
             let uploadToAzure (imageInfo:ImageInfo) =
@@ -121,22 +100,6 @@ module Api =
 
 
         request upload 
-
-    let imageApi = 
-        swagger {
-            // for route in getting (simpleUrl "/time" |> thenReturns now) do
-            //     yield description Of route is "What time is it ?"
-
-            // for route in getOf (path "/time2" >=> now) do
-            //     yield urlTemplate Of route is "/time2"
-            //     yield description Of route is "What time is it 2 ?"
-
-            for route in postOf (path "/pictures" >=> uploadImage) do
-                yield urlTemplate Of route is "/pictures"
-                yield description Of route is "Post an image"
-                yield route |> addResponse 200 "Returns the URL of the created image" None
-                yield parameter "File to upload" postOf route (fun p -> { p with Name = "uploadedImage"; Type = (Some typeof<System.IO.File>); In=FormData })
-        }
 
     [<EntryPoint>]
     let main argv =
