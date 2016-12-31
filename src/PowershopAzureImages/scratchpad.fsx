@@ -42,3 +42,23 @@ let testRegex str =
 // test
 testRegex "http://google.com/test"
 testRegex "alice@hotmail.com"
+
+
+open System.Text.RegularExpressions
+let (|FileExtension|_|) pattern input =
+   let m = Regex.Match(input,pattern) 
+   if (m.Success) then Some m.Groups.[1].Value else None  
+
+let testFileExtension str =
+    match str with
+    | FileExtension @"(\.[^\\]+)$" ext -> printfn "File extension is : %s" ext
+    | _ -> printfn "File extension not found" 
+
+testFileExtension "an-image.jpg"
+testFileExtension "an-imagejpg"
+testFileExtension "an-image\jpg"
+testFileExtension "an-image/jpg"
+
+open System.IO
+printfn "Filename w/out extension: %s" <| Path.GetFileNameWithoutExtension(@"xxx\an-image.jpg")
+printfn "Extension: %s" <| Path.GetExtension("an-image.jpg")

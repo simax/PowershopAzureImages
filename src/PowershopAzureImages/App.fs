@@ -32,12 +32,18 @@ module Api =
         | Success (_, imageInfo) -> proceed imageInfo
         | Failure error -> error |> BAD_REQUEST 
 
+    let destinationPath imageFileName imageSize = 
+        let fileNameWithoutExtension = Path.GetFileNameWithoutExtension(imageFileName)
+        let fileExtension = Path.GetExtension(imageFileName)
+        sprintf "images/%s-[%s]%s" fileNameWithoutExtension imageSize fileExtension
+
+
     let deleteImage =
 
         let delete req = 
             let deleteFromAzure (imageInfo:ImageInfo) =
                 let container = GetShopContainer imageInfo.shopId
-                let imagePath = sprintf "images/%s-[%s].jpg" imageInfo.imageFileName imageInfo.imageSize
+                let imagePath = destinationPath imageInfo.imageFileName imageInfo.imageSize
 
                 let isDeleted = AzureStorageHelpers.deleteFile container imagePath
                 if isDeleted then GONE "Image removed" else BAD_REQUEST "Unable to delete image"
@@ -55,8 +61,9 @@ module Api =
             let uploadToAzure (imageInfo:ImageInfo) =
                 let container = GetShopContainer imageInfo.shopId
                 let sourcePath = imageInfo.sourceFile
-                let destinationPath = sprintf "images/%s-[%s].jpg" imageInfo.imageFileName imageInfo.imageSize
-                AzureStorageHelpers.uploadFile container sourcePath destinationPath 
+                let imagePath = destinationPath imageInfo.imageFileName imageInfo.imageSize
+
+                AzureStorageHelpers.uploadFile container sourcePath imagePath 
                 |> CREATED
 
             let imageInfo = { sourceFile = ""; shopId = ""; imageFileName = ""; imageSize = ""}        
