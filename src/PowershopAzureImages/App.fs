@@ -27,7 +27,6 @@ module Api =
 
     open AzureStorageHelpers
 
-
     let proceedIfValid req imageInfo validator proceed =
         match validator req imageInfo with 
         | Success (_, imageInfo) -> proceed imageInfo
@@ -38,29 +37,29 @@ module Api =
         let delete req = 
             let deleteFromAzure (imageInfo:ImageInfo) =
                 let container = GetShopContainer imageInfo.shopId
-                let imagePath = sprintf "images/%s-[%s].jpg" imageInfo.product imageInfo.imageSize
+                let imagePath = sprintf "images/%s-[%s].jpg" imageInfo.imageFileName imageInfo.imageSize
 
                 let isDeleted = AzureStorageHelpers.deleteFile container imagePath
                 if isDeleted then GONE "Image removed" else BAD_REQUEST "Unable to delete image"
 
-            let imageInfo = { sourceFile = ""; shopId = ""; product = ""; imageSize = ""}        
+            let imageInfo = { sourceFile = ""; shopId = ""; imageFileName = ""; imageSize = ""}        
             proceedIfValid req imageInfo validateImageDeletionInfo deleteFromAzure        
            
         request delete
 
 
     let uploadImage =
-        // Url: /images?shopid=shop001&product=balloon&imageSize=78x78
+        // Url: /images?shopid=shop001&imageFileName=balloon&imageSize=78x78
 
         let upload req = 
             let uploadToAzure (imageInfo:ImageInfo) =
                 let container = GetShopContainer imageInfo.shopId
                 let sourcePath = imageInfo.sourceFile
-                let destinationPath = sprintf "images/%s-[%s].jpg" imageInfo.product imageInfo.imageSize
+                let destinationPath = sprintf "images/%s-[%s].jpg" imageInfo.imageFileName imageInfo.imageSize
                 AzureStorageHelpers.uploadFile container sourcePath destinationPath 
                 |> CREATED
 
-            let imageInfo = { sourceFile = ""; shopId = ""; product = ""; imageSize = ""}        
+            let imageInfo = { sourceFile = ""; shopId = ""; imageFileName = ""; imageSize = ""}        
             proceedIfValid req imageInfo validateImageCreationInfo uploadToAzure        
            
         request upload 

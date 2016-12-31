@@ -8,7 +8,7 @@ module Images =
     type ImageInfo = {
         sourceFile : string
         shopId: string
-        product: string
+        imageFileName: string
         imageSize: string
     }    
 
@@ -24,10 +24,10 @@ module Images =
         | Choice1Of2 shopId -> Success (req, { imageInfo with shopId = shopId})
         | Choice2Of2 _ -> Failure "shopId not supplied" 
         
-    let validateProductExists (req:HttpRequest, imageInfo) =    
-        match req.queryParam "product" with
-        | Choice1Of2 product -> Success (req, { imageInfo with product = product })
-        | Choice2Of2 _ -> Failure "product not supplied" 
+    let validateImageFileNameExists (req:HttpRequest, imageInfo) =    
+        match req.queryParam "image" with
+        | Choice1Of2 imageFileName -> Success (req, { imageInfo with imageFileName = imageFileName })
+        | Choice2Of2 _ -> Failure "Image not supplied" 
 
     let validateImageSizeExists (req:HttpRequest, imageInfo) =    
         match req.queryParam "size" with
@@ -45,13 +45,13 @@ module Images =
         (req, imageInfo)
         |> validateSourceFileExists
         >>= validateShopIdExists  
-        >>= validateProductExists
+        >>= validateImageFileNameExists
         >>= validateImageSizeExists
 
     let validateImageDeletionInfo req imageInfo = 
         (req, imageInfo)  
         |> validateShopIdExists  
-        >>= validateProductExists
+        >>= validateImageFileNameExists
         >>= validateImageSizeExists
 
  

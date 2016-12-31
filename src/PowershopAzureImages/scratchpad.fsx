@@ -24,3 +24,21 @@ let blockBlob = container.GetBlockBlobReference("products/images/bike.jpg")
 let sourceImagePath = "/users/simonlomax/pictures/Bike.Jpg"
 blockBlob.UploadFromFile sourceImagePath
 printfn "Bike URI: %A" blockBlob.Uri
+
+
+open System.Text.RegularExpressions
+let (|FirstRegexGroup|_|) pattern input =
+   let m = Regex.Match(input,pattern) 
+   if (m.Success) then Some m.Groups.[1].Value else None  
+
+let testRegex str = 
+    match str with
+    | FirstRegexGroup "http://(.*?)/(.*)" host -> 
+           printfn "The value is a url and the host is %s" host
+    | FirstRegexGroup ".*?@(.*)" host -> 
+           printfn "The value is an email and the host is %s" host
+    | _ -> printfn "The value '%s' is something else" str
+   
+// test
+testRegex "http://google.com/test"
+testRegex "alice@hotmail.com"
