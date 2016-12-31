@@ -25,10 +25,7 @@ module Api =
 
     open Common
     open Common.Helpers
-
     open Images
-    // open Newtonsoft.Json
-    // open Newtonsoft.Json.Serialization
 
     open AzureStorageHelpers
 
