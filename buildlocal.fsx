@@ -21,7 +21,7 @@ Target "Clean" (fun _ ->
     CleanDirs [buildDir; deployDir]
 )
 
-Target "Build" (fun _ ->
+Target "BuildSolution" (fun _ ->
     // compile all projects below src/app/
     MSBuildDebug buildDir "Build" appReferences
     |> Log "AppBuild-Output: "
@@ -30,7 +30,7 @@ Target "Build" (fun _ ->
 
 // Build order
 "Clean"
-  ==> "Build"
+  ==> "BuildSolution"
 
 // start build
-RunTargetOrDefault "Build"
+RunTargetOrDefault "BuildSolution"
