@@ -12,6 +12,8 @@ module Images =
         imageSize: string
     }    
 
+    type ImageResource = { image: string }
+
     // Validation 
 
     let validateSourceFileExists (req:HttpRequest, imageInfo) = 

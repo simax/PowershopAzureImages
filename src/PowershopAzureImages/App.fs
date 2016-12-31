@@ -19,11 +19,14 @@ module Api =
     open Suave.RequestErrors
     open Suave.Filters
     open Suave.Operators
+    open Suave.Writers
     open System.Net
     open System
     open System.IO
     open Common
     open Images
+    open Newtonsoft.Json
+    open Newtonsoft.Json.Serialization
 
     open AzureStorageHelpers
 
@@ -38,6 +41,17 @@ module Api =
         sprintf "images/%s-[%s]%s" fileNameWithoutExtension imageSize fileExtension
 
 
+    let JSON wp v =
+        let settings = new JsonSerializerSettings()
+        settings.ContractResolver <-
+            new CamelCasePropertyNamesContractResolver()
+
+        JsonConvert.SerializeObject(v, settings)
+        |> wp
+        >=> Writers.setMimeType "application/json; charset=utf-8"
+
+
+
     let deleteImage =
 
         let delete req = 
@@ -46,26 +60,27 @@ module Api =
                 let imagePath = destinationPath imageInfo.imageFileName imageInfo.imageSize
 
                 let isDeleted = AzureStorageHelpers.deleteFile container imagePath
-                if isDeleted then GONE "Image removed" else BAD_REQUEST "Unable to delete image"
+                if isDeleted then NO_CONTENT else BAD_REQUEST "Unable to delete image"
+                    
 
             let imageInfo = { sourceFile = ""; shopId = ""; imageFileName = ""; imageSize = ""}        
             proceedIfValid req imageInfo validateImageDeletionInfo deleteFromAzure        
            
         request delete
 
-
     let uploadImage =
         // Url: /images?shopid=shop001&imageFileName=balloon&imageSize=78x78
-
         let upload req = 
             let uploadToAzure (imageInfo:ImageInfo) =
                 let container = GetShopContainer imageInfo.shopId
                 let sourcePath = imageInfo.sourceFile
                 let imagePath = destinationPath imageInfo.imageFileName imageInfo.imageSize
+                let createdResource = AzureStorageHelpers.uploadFile container sourcePath imagePath    
 
-                AzureStorageHelpers.uploadFile container sourcePath imagePath 
-                |> CREATED
-
+                { image = createdResource }
+                |> JSON CREATED >=> setHeader "Locaion" createdResource
+                
+                
             let imageInfo = { sourceFile = ""; shopId = ""; imageFileName = ""; imageSize = ""}        
             proceedIfValid req imageInfo validateImageCreationInfo uploadToAzure        
            
@@ -89,7 +104,7 @@ module Api =
         let routes = 
             choose [
                 GET >=> path "/" >=> (Successful.OK "Welcome to Powershop AZURE Images API")
-                POST >=> path "/images" >=> uploadImage
+                POST >=> path "/images" >=> uploadImage 
                 DELETE >=> path "/images" >=> deleteImage
 
 
