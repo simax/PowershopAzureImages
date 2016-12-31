@@ -20,13 +20,15 @@ module Api =
     open Suave.Filters
     open Suave.Operators
     open Suave.Writers
-    open System.Net
+
     open System
-    open System.IO
+
     open Common
+    open Common.Helpers
+
     open Images
-    open Newtonsoft.Json
-    open Newtonsoft.Json.Serialization
+    // open Newtonsoft.Json
+    // open Newtonsoft.Json.Serialization
 
     open AzureStorageHelpers
 
@@ -34,22 +36,6 @@ module Api =
         match validator req imageInfo with 
         | Success (_, imageInfo) -> proceed imageInfo
         | Failure error -> error |> BAD_REQUEST 
-
-    let destinationPath imageFileName imageSize = 
-        let fileNameWithoutExtension = Path.GetFileNameWithoutExtension(imageFileName)
-        let fileExtension = Path.GetExtension(imageFileName)
-        sprintf "images/%s-[%s]%s" fileNameWithoutExtension imageSize fileExtension
-
-
-    let JSON wp v =
-        let settings = new JsonSerializerSettings()
-        settings.ContractResolver <-
-            new CamelCasePropertyNamesContractResolver()
-
-        JsonConvert.SerializeObject(v, settings)
-        |> wp
-        >=> Writers.setMimeType "application/json; charset=utf-8"
-
 
 
     let deleteImage =
@@ -103,7 +89,7 @@ module Api =
 
         let routes = 
             choose [
-                GET >=> path "/" >=> (Successful.OK "Welcome to Powershop AZURE Images API")
+                GET >=> path "/" >=> (OK "Welcome to Powershop AZURE Images API")
                 POST >=> path "/images" >=> uploadImage 
                 DELETE >=> path "/images" >=> deleteImage
 
