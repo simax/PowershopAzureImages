@@ -59,11 +59,9 @@ module Api =
                 let sourcePath = imageInfo.sourceFile
                 let imagePath = destinationPath imageInfo.imageFileName imageInfo.imageSize
                 let createdResource = AzureStorageHelpers.uploadFile container sourcePath imagePath    
-
-                { image = createdResource }
+                { image = createdResource } 
                 |> JSON CREATED >=> setHeader "Location" createdResource
-                
-                
+
             let imageInfo = { sourceFile = ""; shopId = ""; imageFileName = ""; imageSize = ""}        
             proceedIfValid req imageInfo validateImageCreationInfo uploadToAzure        
            

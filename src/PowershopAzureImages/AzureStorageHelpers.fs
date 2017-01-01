@@ -19,7 +19,9 @@ module AzureStorageHelpers =
     let uploadFile (shopContainer:CloudBlobContainer) sourcePath destinationPath = 
         shopContainer.CreateIfNotExists() |> ignore
         let blockBlob = shopContainer.GetBlockBlobReference(destinationPath) 
-        blockBlob.UploadFromFile sourcePath
+        async {
+            do! blockBlob.UploadFromFileAsync sourcePath
+        } |> Async.RunSynchronously
         blockBlob.Uri.ToString()
 
     let deleteFile (shopContainer:CloudBlobContainer) imageUrl = 
