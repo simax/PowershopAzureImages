@@ -21,13 +21,15 @@ module AzureStorageHelpers =
         let blockBlob = shopContainer.GetBlockBlobReference(destinationPath) 
         async {
             do! blockBlob.UploadFromFileAsync sourcePath
+            return blockBlob.Uri.ToString()
         } |> Async.RunSynchronously
-        blockBlob.Uri.ToString()
+        
 
     let deleteFile (shopContainer:CloudBlobContainer) imageUrl = 
         let blockBlob = shopContainer.GetBlockBlobReference(imageUrl) 
-        let exists = blockBlob.Exists()
         async {
+            let exists = blockBlob.Exists()
             do! blockBlob.DeleteIfExistsAsync()
+            return exists
         } |> Async.RunSynchronously
-        exists        
+           
